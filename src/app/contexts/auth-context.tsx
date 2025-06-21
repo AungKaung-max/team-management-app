@@ -38,21 +38,17 @@ export interface Team {
 }
 
 interface AppContextType {
-  // Auth
   isAuthenticated: boolean;
   username: string | null;
   login: (username: string) => void;
   logout: () => void;
 
-  // Players
   players: Player[];
   loading: boolean;
   error: string | null;
   hasMore: boolean;
   fetchPlayers: () => void;
-  // resetPlayers: () => void;
 
-  // Teams
   teams: Team[];
   addTeam: (team: Omit<Team, "id" | "createdAt">) => void;
   updateTeam: (id: string, team: Omit<Team, "id" | "createdAt">) => void;
@@ -61,28 +57,22 @@ interface AppContextType {
   getTeamByPlayer: (playerId: number) => Team | undefined;
 }
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  // Auth
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
 
-  // Players
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [isRateLimited, setIsRateLimited] = useState(false);
-  // const [lastRequestTime, setLastRequestTime] = useState(0);
-  const [page, setPage] = useState(0);
-  // const [reachedEnd, setReachedEnd] = useState(false);
 
-  // Teams
+  const [page, setPage] = useState(0);
+
   const [teams, setTeams] = useState<Team[]>([]);
 
-  // Load data on mount
   useEffect(() => {
     const savedAuth = localStorage.getItem("auth");
     if (savedAuth) {
@@ -105,7 +95,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Save data
   useEffect(() => {
     localStorage.setItem("auth", JSON.stringify({ isAuthenticated, username }));
   }, [isAuthenticated, username]);
@@ -114,7 +103,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("teams", JSON.stringify(teams));
   }, [teams]);
 
-  // Auth functions
   const login = (user: string) => {
     setIsAuthenticated(true);
     setUsername(user);
@@ -146,7 +134,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setIsRateLimited(true);
         setError("Too many requests. Please wait...");
         setLoading(false);
-        // Auto-reset rate limiting after 10 seconds
         setTimeout(() => {
           setIsRateLimited(false);
           setError(null);
@@ -160,7 +147,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       const data = await response.json();
 
-      // Check if we actually got data
       if (!data.data || data.data.length === 0) {
         setHasMore(false);
         setLoading(false);
@@ -181,7 +167,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [loading, hasMore, isRateLimited]);
 
-  // Team functions
   const addTeam = (teamData: Omit<Team, "id" | "createdAt">) => {
     const newTeam: Team = {
       ...teamData,
@@ -218,7 +203,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <AppContext.Provider
       value={{
-        // Auth
         isAuthenticated,
         username,
         login,
@@ -226,10 +210,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         players,
         loading,
         error,
-        hasMore, // Always true for infinite loop
+        hasMore,
         fetchPlayers,
-        // resetPlayers,
-        // // Teams
         teams,
         addTeam,
         updateTeam,

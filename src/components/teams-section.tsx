@@ -16,6 +16,7 @@ import {
   Crown,
 } from "lucide-react";
 import { Team, useApp } from "@/app/contexts/auth-context";
+import { TeamModal } from "./team-model";
 
 interface TeamsSectionProps {
   onCreateTeam: () => void;
@@ -170,13 +171,13 @@ export function TeamsSection({ onCreateTeam }: TeamsSectionProps) {
         </div>
       )}
 
-      {/* {editingTeam && (
+      {editingTeam && (
         <TeamModal
           isOpen={true}
           onClose={() => setEditingTeam(null)}
           team={editingTeam}
         />
-      )} */}
+      )}
     </div>
   );
 }
